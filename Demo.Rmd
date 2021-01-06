@@ -29,31 +29,54 @@ library(leaflet)
 load("bg.rds")
 ```
 
+The purpose of this document is to demonstrate the power of using ABOUT-US (see demo instance at https://aboutus.internetofwater.dev) to create and publish service area boundaries. Each boundary gets a unique URL that can be read by machines separately and used for utility-specific web applications. For example, the URL "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb" retrieves the GeoJSON version of a boundary.
+
+Below, we define a simple function that, given the url for an ABOUT-US service area boundary and an object containing Census data, will produce (1) An interactive map of the service area boundary with intersecting census block group Median Household Income, and the 24 Hour QPF; (2) An interactive histogram of median household income for block groups within the service area a boundary.
+
 ```{r functions, incluce=FALSE}
 
-profilePWS <- function(url,censusdata){
+profilePWS <- function(url=url,censusdata=censusdata){
   pws <- sf::read_sf(url)
   pws.census <- censusdata[pws,]
-  m <- mapview(pws, layer.name = "Service Area Boundary",
+  map <- mapview::mapview(pws, layer.name = "Service Area Boundary",
                alpha =1, stroke=TRUE,color="black",col.regions="black", alpha.regions=0, lwd=4,legend=TRUE) +
-    mapview(pws.census,zcol="Median HH Income",layer.name="Census Block Group - Median HH Income (2019 ACS 5-year 2019)")
+    mapview::mapview(pws.census,zcol="Median HH Income",layer.name="Census Block Group - </br> Median HH Income </br> (2019 ACS 5-year 2019)")
   
-  m@map <- m@map %>% addWMSTiles(group = 'NWS QPF 24 Hour Day 1',
+  map@map <- map@map %>% leaflet::addWMSTiles(group = 'NWS QPF 24 Hour Day 1',
                               "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Forecasts_Guidance_Warnings/wpc_qpf/MapServer/WMSServer?",
                               layers  = 1,
                               options = WMSTileOptions(format = "image/png", transparent = TRUE),
                               attribution = "National Weather Service, U.S. Census Bureau")  %>%
   
   mapview:::mapViewLayersControl(names = c("NWS QPF 24 Hour Day 1")) 
-  m
   
- # p <- ggplotly(ggplot(pws.census, aes(x=`Median HH Income`)) + geom_histogram())
-#  p
+  
+  plot <- plotly::ggplotly(ggplot2::ggplot(pws.census, aes(x=`Median HH Income`)) + geom_histogram())
+  
+  
+  x <- list(map=map,plot=plot)
+  return(x)
+
 }
 
 ```
-owasa
-```{r owasa, results="asis"}
+
+As an example, here is the function applied to the URL for the Orange Water and Sewer Authority (Chapel Hill/Carrboro NC).
+
+```{r owasa, results="asis", warning=FALSE, message=FALSE}
 owasa <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb"
-profilePWS(owasa,bg)
+owasa<-profilePWS(url=owasa,censusdata=bg)
+
+owasa$map
+owasa$plot
+```
+
+It is trivially easy to do the same for any boundary in the ABOUT-US system (or indeed, any web service delivering a polygon). For example, we use the city of Raleigh below.
+
+```{r raleigh, results="asis", warning=FALSE, message=FALSE}
+raleigh <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0392010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb"
+raleigh<-profilePWS(url=raleigh,censusdata=bg)
+
+raleigh$map
+raleigh$plot
 ```
