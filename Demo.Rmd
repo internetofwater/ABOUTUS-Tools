@@ -1,0 +1,59 @@
+---
+title: "ABOUT-US Use Case Demo"
+author: "Kyle Onda"
+date: "1/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sf)
+library(mapview)
+library(viridis)
+library(viridisLite)
+library(tidycensus)
+library(plotly)
+library(leaflet)
+```
+
+```{r censusprep, include=FALSE}
+# vars <- load_variables(2019, "acs5", cache = TRUE)
+# census_api_key("b25f8b1b7bf10561c9cbc3a20a4d2572677f1f05")
+# options(tigris_use_cache = TRUE)
+# bg <- get_acs(year=2019,geography = "block group",
+#                    variables = "B19013_001", geometry = TRUE, state= "NC") 
+# bg<-rename(bg,`Median HH Income` = estimate)
+#bg <- sf::st_transform(bg,4326)
+#save(bg,file="bg.rds")
+load("bg.rds")
+```
+
+```{r functions, incluce=FALSE}
+
+profilePWS <- function(url,censusdata){
+  pws <- sf::read_sf(url)
+  pws.census <- censusdata[pws,]
+  m <- mapview(pws, layer.name = "Service Area Boundary",
+               alpha =1, stroke=TRUE,color="black",col.regions="black", alpha.regions=0, lwd=4,legend=TRUE) +
+    mapview(pws.census,zcol="Median HH Income",layer.name="Census Block Group - Median HH Income (2019 ACS 5-year 2019)")
+  
+  m@map <- m@map %>% addWMSTiles(group = 'NWS QPF 24 Hour Day 1',
+                              "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Forecasts_Guidance_Warnings/wpc_qpf/MapServer/WMSServer?",
+                              layers  = 1,
+                              options = WMSTileOptions(format = "image/png", transparent = TRUE),
+                              attribution = "National Weather Service, U.S. Census Bureau")  %>%
+  
+  mapview:::mapViewLayersControl(names = c("NWS QPF 24 Hour Day 1")) 
+  m
+  
+ # p <- ggplotly(ggplot(pws.census, aes(x=`Median HH Income`)) + geom_histogram())
+#  p
+}
+
+```
+owasa
+```{r owasa, results="asis"}
+owasa <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb"
+profilePWS(owasa,bg)
+```
