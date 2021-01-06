@@ -29,7 +29,7 @@ library(leaflet)
 load("bg.rds")
 ```
 
-The purpose of this document is to demonstrate the power of using ABOUT-US (see demo instance at https://aboutus.internetofwater.dev) to create and publish service area boundaries. Each boundary gets a unique URL that can be read by machines separately and used for utility-specific web applications. For example, the URL "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb" retrieves the GeoJSON version of a boundary.
+The purpose of this document is to demonstrate the power of using ABOUT-US (see demo instance at https://aboutus.internetofwater.dev) to create and publish service area boundaries. Each boundary gets a unique URL that can be read by machines separately and used for utility-specific web applications. For example, the URL ""https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326"" retrieves the GeoJSON version of a boundary.
 
 Below, we define a simple function that, given the url for an ABOUT-US service area boundary and an object containing Census data, will produce (1) An interactive map of the service area boundary with intersecting census block group Median Household Income, and the 24 Hour QPF; (2) An interactive histogram of median household income for block groups within the service area a boundary.
 
@@ -64,7 +64,7 @@ profilePWS <- function(url=url,censusdata=censusdata){
 As an example, here is the function applied to the URL for the Orange Water and Sewer Authority (Chapel Hill/Carrboro NC).
 
 ```{r owasa, results="asis", warning=FALSE, message=FALSE}
-owasa <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb"
+owasa <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0368010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326"
 owasa<-profilePWS(url=owasa,censusdata=bg)
 
 owasa$map
@@ -74,7 +74,7 @@ owasa$plot
 It is trivially easy to do the same for any boundary in the ABOUT-US system (or indeed, any web service delivering a polygon). For example, we use the city of Raleigh below.
 
 ```{r raleigh, results="asis", warning=FALSE, message=FALSE}
-raleigh <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0392010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326&access_token=EP6cEgRh1jWfDbubu4Iez5I34PQAOb"
+raleigh <- "https://aboutus.internetofwater.dev/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3ANC0392010&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326"
 raleigh<-profilePWS(url=raleigh,censusdata=bg)
 
 raleigh$map
